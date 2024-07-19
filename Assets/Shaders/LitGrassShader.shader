@@ -35,6 +35,7 @@ Shader "Custom/LitGrassShader"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 
             #pragma multi_compile_instancing
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
@@ -112,15 +113,15 @@ Shader "Custom/LitGrassShader"
             {
                 float3 normal = normalize(IN.normalWS);
                 
-                float3 lightDir = normalize(float3(10, 10, 0) - IN.positionWS.xyz);
+                float3 lightDir = normalize(_MainLightPosition - IN.positionWS.xyz);
                 float3 viewDir = normalize(_WorldSpaceCameraPos - IN.positionWS.xyz);
 
                 float diff = max(dot(normal, lightDir), 0.0);
-                float3 diffuse = _MainLightColor.rgb * diff * IN.color.rgb;
+                float3 diffuse = diff * _MainLightColor.rgb  * IN.color.rgb;
                 
-                float3 reflectDir = reflect(-lightDir, normal);
-                float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);  // Adjust shininess as needed
-                float3 specular = _MainLightColor.rgb * spec * 0.5;  // Adjust specular intensity as needed
+                float3 halfwayDir = normalize(lightDir + viewDir);
+                float spec = pow(max(dot(normal, halfwayDir), 0.0), 32);  // Adjust shininess as needed
+                float3 specular = spec * 0.5 * _MainLightColor.rgb;  // Adjust specular intensity as needed
 
                 float3 ambient = 0.1 * IN.color.rgb;  // Simple ambient lighting
 
