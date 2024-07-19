@@ -40,6 +40,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _BaseWindNoise:
+        m_Texture: {fileID: 2800000, guid: 15d7ee0c27cf44fc5b429737897038c7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -108,9 +112,11 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _BaseWindForce: 0.1
     - _BladeCurve: 0.44
     - _BladeCurveForward: 0.38
     - _BladeCurvePow: 2
+    - _BladeCurvePow1: 2
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BlendOp: 0

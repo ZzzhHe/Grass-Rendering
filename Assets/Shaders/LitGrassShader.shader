@@ -6,6 +6,9 @@ Shader "Custom/LitGrassShader"
         _MidColor1 ("Color 2", Color) = (0.4, 0.8, 0.3, 1)
         _MidColor2 ("Color 1", Color) = (0.25, 0.5, 0.24, 1)
         _BaseColor ("Base Color", Color) = (0.14, 0.35, 0.1, 1)
+        
+        _BaseWindForce ("Base Wind Force", Range(0, 1.0)) = 0.2
+        // _BaseWindNoise ("Base Wind Noise Map", 2D) = "white" {}
 
         _BladeCurve ("Blade Curve", Range(0, 1.0)) = 0.5
         _BladeCurvePow ("Blade Curve Pow", Range(1.0, 4.0)) = 2.0
@@ -59,10 +62,16 @@ Shader "Custom/LitGrassShader"
 
             uniform float4 _TopColor, _MidColor1, _MidColor2, _BaseColor;
             uniform float _BladeCurve, _BladeCurvePow;
+            uniform float _BaseWindForce;
 
-            float rand(uint seed)
+            float randInstance(uint seed)
             {
                 return frac(sin(seed * 12.9898 + 78.233) * 43758.5453);
+            }
+
+            float randXZ(float2 xz) 
+            {
+                return frac(sin(dot(xz, float2(12.9898, 78.233))) * 43758.5453);
             }
 
             Varyings GrassShaderVertex(Attributes IN)
@@ -75,10 +84,13 @@ Shader "Custom/LitGrassShader"
 
                 float3 worldPosition = TransformObjectToWorld(IN.positionOS.xyz);
                 float3 worldNormal = TransformObjectToWorldNormal(IN.normalOS);
+                float curveFactor = pow(worldPosition.y, _BladeCurvePow);
 
                 #ifdef INSTANCING_ON
-                float randomOffset = rand(float(IN.instanceID)) - 0.5;  // random from -0.5 to 0.5
-                worldPosition.x += _BladeCurve * randomOffset * pow(worldPosition.y, _BladeCurvePow); 
+                float randomOffset = randInstance(float(IN.instanceID)) - 0.5;  // random from -0.5 to 0.5
+                float curveAmount = _BladeCurve * randomOffset;
+                curveAmount += sin(randXZ(worldPosition.xz) + _Time * 25) * _BaseWindForce;  // Wind noise
+                worldPosition.x += curveAmount * curveFactor; 
                 #endif
 
                 OUT.positionWS = float4(worldPosition, 1.0);
@@ -88,8 +100,8 @@ Shader "Custom/LitGrassShader"
 
                 // Color gradient
                 float t = saturate(worldPosition.y);
-                float4 color = lerp(_BaseColor, _MidColor2, t);
-                color = lerp(color, _MidColor1, t * t);
+                float4 color = lerp(_BaseColor, _MidColor1, t);
+                color = lerp(color, _MidColor2, t * t);
                 color = lerp(color, _TopColor, t * t * t);
                 OUT.color = color;
 
