@@ -2,7 +2,11 @@ Shader "Custom/LitGrassShader"
 {
     Properties
     {
-        _Color ("Color", Color) = (0.074, 0.522, 0.059, 1)
+        _TopColor ("Tip Color", Color) = (0.74, 1, 0.6, 1)
+        _MidColor1 ("Color 2", Color) = (0.4, 0.8, 0.3, 1)
+        _MidColor2 ("Color 1", Color) = (0.25, 0.5, 0.24, 1)
+        _BaseColor ("Base Color", Color) = (0.14, 0.35, 0.1, 1)
+
         _BladeCurve ("Blade Curve", Range(1,4)) = 2
     }
     SubShader
@@ -46,63 +50,70 @@ Shader "Custom/LitGrassShader"
                 float3 normalWS : NORMAL;
                 float4 positionWS : TEXCOORD1;
                 float4 positionCS : SV_POSITION;
+                float4 color : COLOR0;
 
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            uniform float4 _Color;
+            uniform float4 _TopColor, _MidColor1, _MidColor2, _BaseColor;
             uniform float _BladeCurve;
 
             float rand(uint seed)
             {
-                return frac(sin(seed * 12.9898 + 78.233) * 43758.5453) * 2 - 1;
+                return frac(sin(seed * 12.9898 + 78.233) * 43758.5453);
             }
 
-            Varyings GrassShaderVertex(Attributes input)
+            Varyings GrassShaderVertex(Attributes IN)
             {
-                Varyings output = (Varyings)0;
+                Varyings OUT = (Varyings)0;
 
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
 
-                float3 worldPosition = TransformObjectToWorld(input.positionOS.xyz);
-                float3 worldNormal = TransformObjectToWorldNormal(input.normalOS);
+                float3 worldPosition = TransformObjectToWorld(IN.positionOS.xyz);
+                float3 worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
                 #ifdef INSTANCING_ON
-                float randomOffset = rand(float(input.instanceID));
+                float randomOffset = rand(float(IN.instanceID)) - 0.5; 
                 worldPosition.x += randomOffset * pow(worldPosition.y, _BladeCurve); 
                 #endif
 
-                output.positionWS = float4(worldPosition, 1.0);
-                output.normalWS = worldNormal;
-                output.positionCS = TransformWorldToHClip(worldPosition);
+                OUT.positionWS = float4(worldPosition, 1.0);
+                OUT.normalWS = worldNormal;
+                OUT.positionCS = TransformWorldToHClip(worldPosition);
+                OUT.uv = IN.uv;
 
-                output.uv = input.uv;
+                // Color gradient
+                float t = saturate(worldPosition.y);
+                float4 color = lerp(_BaseColor, _MidColor2, t);
+                color = lerp(color, _MidColor1, t * t);
+                color = lerp(color, _TopColor, t * t * t);
+                OUT.color = color;
 
-                return output;
+                return OUT;
             }
 
-            half4 GrassShaderFragment(Varyings i) : SV_TARGET 
+            half4 GrassShaderFragment(Varyings IN) : SV_TARGET 
             {
-                float3 normal = normalize(i.normalWS);
-                // float3 lightDir = 
-                float3 lightDir = normalize(float3(0, 3, 0) - i.positionWS.xyz);
-                float3 viewDir = normalize(_WorldSpaceCameraPos - i.positionWS.xyz);
+                float3 normal = normalize(IN.normalWS);
+                
+                float3 lightDir = normalize(float3(10, 10, 0) - IN.positionWS.xyz);
+                float3 viewDir = normalize(_WorldSpaceCameraPos - IN.positionWS.xyz);
 
                 float diff = max(dot(normal, lightDir), 0.0);
-                float3 diffuse = _MainLightColor.rgb * diff;
+                float3 diffuse = _MainLightColor.rgb * diff * IN.color.rgb;
                 
                 float3 reflectDir = reflect(-lightDir, normal);
                 float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);  // Adjust shininess as needed
                 float3 specular = _MainLightColor.rgb * spec * 0.5;  // Adjust specular intensity as needed
 
-                float3 ambient = 0.1 * _Color.rgb;  // Simple ambient lighting
+                float3 ambient = 0.1 * IN.color.rgb;  // Simple ambient lighting
 
-                float3 finalColor = (_Color.rgb * diffuse + specular + ambient) * _Color.rgb;
+                float3 finalColor = ambient + diffuse + specular;
 
-                return half4(finalColor, _Color.a);
+                return half4(finalColor, IN.color.a);
             }
             
             ENDHLSL

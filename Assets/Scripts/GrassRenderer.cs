@@ -11,9 +11,7 @@ public class GrassRenderer : MonoBehaviour
     public ComputeShader computeShader;
     public Material grassMaterial;
     [SerializeField] private int gridSize;
-    [SerializeField] private float bladeWidth = 1/8f;
-    [SerializeField] private float bladeHeight = 1.0f;
-    
+    [SerializeField] private float bladeSize = 1.0f;    
     private int grassBladesNum;
     private ComputeBuffer grassBladeBuffer;
     private GrassBlade[] grassBladeData;
@@ -38,14 +36,14 @@ public class GrassRenderer : MonoBehaviour
         grassRenderParams = new RenderParams(grassMaterial);
 
         grassBladeLocationMatrixs = new Matrix4x4[grassBladesNum];
-
-        for (int i = 0; i < grassBladesNum; i ++) {
-            grassBladeLocationMatrixs[i]  = Matrix4x4.TRS(grassBladeData[i].position, Quaternion.Euler(grassBladeData[i].rotation), grassBladeData[i].scale);
-        }
     }
 
     void Update()
     {
+        for (int i = 0; i < grassBladesNum; i ++) {
+            grassBladeLocationMatrixs[i]  = Matrix4x4.TRS(grassBladeData[i].position, Quaternion.Euler(grassBladeData[i].rotation), grassBladeData[i].scale * bladeSize);
+        }
+
         Graphics.RenderMeshInstanced(grassRenderParams, grassBladeMesh, 0, grassBladeLocationMatrixs);
     }
 
