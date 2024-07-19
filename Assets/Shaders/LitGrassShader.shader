@@ -7,7 +7,8 @@ Shader "Custom/LitGrassShader"
         _MidColor2 ("Color 1", Color) = (0.25, 0.5, 0.24, 1)
         _BaseColor ("Base Color", Color) = (0.14, 0.35, 0.1, 1)
 
-        _BladeCurve ("Blade Curve", Range(1,4)) = 2
+        _BladeCurve ("Blade Curve", Range(0, 1.0)) = 0.5
+        _BladeCurvePow ("Blade Curve Pow", Range(1.0, 4.0)) = 2.0
     }
     SubShader
     {
@@ -57,7 +58,7 @@ Shader "Custom/LitGrassShader"
             };
 
             uniform float4 _TopColor, _MidColor1, _MidColor2, _BaseColor;
-            uniform float _BladeCurve;
+            uniform float _BladeCurve, _BladeCurvePow;
 
             float rand(uint seed)
             {
@@ -76,8 +77,8 @@ Shader "Custom/LitGrassShader"
                 float3 worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
                 #ifdef INSTANCING_ON
-                float randomOffset = rand(float(IN.instanceID)) - 0.5; 
-                worldPosition.x += randomOffset * pow(worldPosition.y, _BladeCurve); 
+                float randomOffset = rand(float(IN.instanceID)) - 0.5;  // random from -0.5 to 0.5
+                worldPosition.x += _BladeCurve * randomOffset * pow(worldPosition.y, _BladeCurvePow); 
                 #endif
 
                 OUT.positionWS = float4(worldPosition, 1.0);

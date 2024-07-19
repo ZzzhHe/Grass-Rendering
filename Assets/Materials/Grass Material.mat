@@ -108,8 +108,9 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _BladeCurve: 2
+    - _BladeCurve: 0.44
     - _BladeCurveForward: 0.38
+    - _BladeCurvePow: 2
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BlendOp: 0

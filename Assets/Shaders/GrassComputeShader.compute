@@ -6,26 +6,28 @@ struct GrassBlade {
     float3 rotation;
 };
 
+float CellSize = 0.16;
+int GridSize = 80;
+
 RWStructuredBuffer<GrassBlade> grassBlades;
 
 float rand(float seed);
 
 [numthreads(128, 1, 1)]
 void GenerateGrassBlades (uint3 id : SV_DispatchThreadID) {
-    float cellSize = 0.16;
-    int gridSize = 80;
-    float gridOffset = (gridSize * cellSize) * 0.5;
-    int totalCells = gridSize * gridSize;
+    
+    float gridOffset = (GridSize * CellSize) * 0.5;
+    int totalCells = GridSize * GridSize;
 
     if (id.x < totalCells) {
-        int cellX = id.x % gridSize;
-        int cellZ = id.x / gridSize;
+        int cellX = id.x % GridSize;
+        int cellZ = id.x / GridSize;
         
         GrassBlade blade;
         blade.position = float3(
-            cellX * cellSize + rand(id.x + 3) * cellSize - gridOffset,
+            cellX * CellSize + rand(id.x + 3) * CellSize - gridOffset,
             0, 
-            cellZ * cellSize + rand(id.x + 4) * cellSize - gridOffset
+            cellZ * CellSize + rand(id.x + 4) * CellSize - gridOffset
             );
         blade.scale = float3(1, 1, 1);
         blade.rotation = float3(0, rand(id.x + 2) * 360.0, 0);

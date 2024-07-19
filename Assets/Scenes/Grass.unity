@@ -458,7 +458,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   computeShader: {fileID: 7200000, guid: 53dc0f246e6ea48e2a1f40690c08bf2d, type: 3}
   grassMaterial: {fileID: 2100000, guid: 6d4f78da271404ca3b6f17c36b932c04, type: 2}
-  gridSize: 25
+  gridSize: 80
+  cellSize: 0.16
   bladeSize: 1
 --- !u!4 &1699868639
 Transform:
