@@ -8,6 +8,7 @@ struct GrassBlade {
 
 public class GrassRenderer : MonoBehaviour
 {
+    public Camera mainCamera;
     public ComputeShader computeShader;
     public Material grassMaterial;
     [SerializeField] private int gridSize = 80;
@@ -16,15 +17,21 @@ public class GrassRenderer : MonoBehaviour
     private int grassBladesNum;
     private ComputeBuffer grassBladeBuffer;
     private GrassBlade[] grassBladeData;
-    private Matrix4x4[] grassBladeLocationMatrixs;
+    private Matrix4x4[] grassBladeMatrixs;
     RenderParams grassRenderParams;
-    private Mesh grassBladeMesh;
-    
+    private Mesh grassBladeMesh_lowLOD;
+    private Mesh grassBladeMesh_highLOD;
+    // TODO: implement the LOD system depends on the distance from the camera
+    private Matrix4x4[] grassBladeMatrixs_lowLOD, grassBladeMatrixs_hightHOD;
+    private int highLODCounter, lowLODCounter;
 
     void Start()
     {
         grassBladesNum = gridSize * gridSize;
-        grassBladeMesh = GrassBladeMesh.CreateGrassBladeMesh();
+        
+        grassBladeMesh_lowLOD = GrassBladeMesh.CreateGrassBladeMesh_LowLOD();
+        grassBladeMesh_highLOD = GrassBladeMesh.CreateGrassBladeMesh_HighLOD();
+
         grassBladeData = new GrassBlade[grassBladesNum];
         grassBladeBuffer = new ComputeBuffer(grassBladesNum, sizeof(float) * 9);
         computeShader.SetBuffer(0, "grassBlades", grassBladeBuffer);
@@ -37,16 +44,15 @@ public class GrassRenderer : MonoBehaviour
 
         grassRenderParams = new RenderParams(grassMaterial);
 
-        grassBladeLocationMatrixs = new Matrix4x4[grassBladesNum];
+        grassBladeMatrixs = new Matrix4x4[grassBladesNum];
     }
 
     void Update()
     {
         for (int i = 0; i < grassBladesNum; i ++) {
-            grassBladeLocationMatrixs[i]  = Matrix4x4.TRS(grassBladeData[i].position, Quaternion.Euler(grassBladeData[i].rotation), grassBladeData[i].scale * bladeSize);
+            grassBladeMatrixs[i]  = Matrix4x4.TRS(grassBladeData[i].position, Quaternion.Euler(grassBladeData[i].rotation), grassBladeData[i].scale * bladeSize);
         }
-
-        Graphics.RenderMeshInstanced(grassRenderParams, grassBladeMesh, 0, grassBladeLocationMatrixs);
+        Graphics.RenderMeshInstanced(grassRenderParams, grassBladeMesh_highLOD, 0, grassBladeMatrixs);
     }
 
     void OnDestroy()

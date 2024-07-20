@@ -97,7 +97,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WindNoiseTex:
-        m_Texture: {fileID: 2800000, guid: 15d7ee0c27cf44fc5b429737897038c7, type: 3}
+        m_Texture: {fileID: 2800000, guid: b7f3867cc797b49b284f0f79d055d44b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -117,7 +117,7 @@ Material:
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _BaseWindForce: 0
-    - _BladeCurve: 0.35
+    - _BladeCurve: 0.5
     - _BladeCurveForward: 0.38
     - _BladeCurvePow: 1.5
     - _BladeCurvePow1: 2
@@ -163,9 +163,11 @@ Material:
     - _Surface: 0
     - _UVSec: 0
     - _UseUIAlphaClip: 0
-    - _WindForce: 0.5
-    - _WindFrequency: 0.19
+    - _WindForce: 1
+    - _WindFrequency: 0.5
     - _WindQuality: 0
+    - _WindScale: 2
+    - _WindSpeed: 1
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

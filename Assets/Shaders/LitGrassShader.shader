@@ -7,10 +7,13 @@ Shader "Custom/LitGrassShader"
         _MidColor2 ("Color 1", Color) = (0.25, 0.5, 0.24, 1)
         _BaseColor ("Base Color", Color) = (0.14, 0.35, 0.1, 1)
         
-        _WindSpeed ("Wind Speed", Range(0, 3.0)) = 1.0
+        _WindSpeed ("Wind Speed", Range(0, 2.0)) = 1.0
         _WindScale ("Wind Scale", Range(0, 5.0)) = 1.0
-        _WindFrequency ("Wind Frequency", Range(0, 5.0)) = 1.0
+        _WindFrequency ("Wind Frequency", Range(0, 1.0)) = 1.0
         _WindNoiseTex ("Wind Noise Texture", 2D) = "white" {}
+
+        _BladeHeightVariation ("Blade Height Variation", Range(0, 2.0)) = 1.0
+        _BladeHeightNoiseTex ("Blade Height Noise Texture", 2D) = "white" {}
 
         _BladeCurve ("Blade Curve", Range(0, 1.0)) = 0.5
         _BladeCurvePow ("Blade Curve Pow", Range(1.0, 4.0)) = 2.0
@@ -66,6 +69,8 @@ Shader "Custom/LitGrassShader"
             uniform float _BladeCurve, _BladeCurvePow;
             uniform float _WindSpeed, _WindScale, _WindFrequency;
             uniform sampler2D _WindNoiseTex;
+            uniform float _BladeHeightVariation;
+            uniform sampler2D _BladeHeightNoiseTex;
             
             float randInstance(uint seed)
             {
@@ -88,8 +93,13 @@ Shader "Custom/LitGrassShader"
                 float3 worldPosition = TransformObjectToWorld(IN.positionOS.xyz);
                 float3 worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
-                float curveFactor = pow(worldPosition.y, _BladeCurvePow);
-                
+                // random based on instance ID
+                float instanceRandom = 0;
+                #ifdef INSTANCING_ON
+                instanceRandom = randInstance(float(IN.instanceID));
+                #endif
+
+                // Wind Effect
                 float u = sin(worldPosition.x * _WindScale + _Time * _WindFrequency) 
                 + cos(worldPosition.z * _WindScale + _Time * _WindFrequency * 0.5);
                 float v = sin(worldPosition.z * _WindScale + _Time * _WindFrequency)
@@ -98,13 +108,19 @@ Shader "Custom/LitGrassShader"
 
                 noiseInput = 0.5 + 0.5 * noiseInput;
                 float windNoise = tex2Dlod(_WindNoiseTex, float4(noiseInput, 0.0, 0.0)).r;
-
-                #ifdef INSTANCING_ON
-                float randomOffset = randInstance(float(IN.instanceID));
-                float curveAmount = _BladeCurve * randomOffset;
-                curveAmount += windNoise * _Time * _WindSpeed;
+                
+                // blade curve
+                float curveFactor = pow(worldPosition.y, _BladeCurvePow);
+                float curveAmount = _BladeCurve * instanceRandom; 
+                // wind effect
+                curveAmount += windNoise * _Time * _WindSpeed; 
                 worldPosition.x += curveAmount * curveFactor; 
-                #endif
+                
+                // Height Variation
+                float2 heightNoiseInput = normalize(worldPosition.xz);
+                float heightNoise = tex2Dlod(_BladeHeightNoiseTex, float4(heightNoiseInput, 0.0, 0.0)).r;
+                float heightFactor = lerp(0.5, 2.5, heightNoise) * _BladeHeightVariation;
+                worldPosition.y *= heightFactor;
 
                 OUT.positionWS = float4(worldPosition, 1.0);
                 OUT.normalWS = worldNormal;
