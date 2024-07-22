@@ -125,7 +125,7 @@ Material:
     - _BladeCurveForward: 0.38
     - _BladeCurvePow: 1.2
     - _BladeCurvePow1: 2
-    - _BladeHeightVariation: 0.99
+    - _BladeHeightVariation: 1
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BlendOp: 0
@@ -171,10 +171,10 @@ Material:
     - _UVSec: 0
     - _UseUIAlphaClip: 0
     - _WindForce: 1
-    - _WindFrequency: 0.75
+    - _WindFrequency: 0.5
     - _WindQuality: 0
-    - _WindScale: 0.77
-    - _WindSpeed: 2.18
+    - _WindScale: 0.25
+    - _WindSpeed: 1.5
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

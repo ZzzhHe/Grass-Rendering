@@ -8,8 +8,8 @@ Shader "Custom/LitGrassShader"
         _BaseColor ("Base Color", Color) = (0.14, 0.35, 0.1, 1)
         
         _WindSpeed ("Wind Speed", Range(0, 5.0)) = 1.0
-        _WindScale ("Wind Scale", Range(0, 5.0)) = 1.0
-        _WindFrequency ("Wind Frequency", Range(0, 1.0)) = 1.0
+        _WindScale ("Wind Scale", Range(0, 3.0)) = 1.0
+        _WindFrequency ("Wind Frequency", Range(0, 3.0)) = 1.0
         _WindNoiseTex ("Wind Noise Texture", 2D) = "white" {}
 
         _Stiffness ("Stiffness", Range(0.1, 1.0)) = 0.5
@@ -110,9 +110,9 @@ Shader "Custom/LitGrassShader"
                 #endif
 
                 // Height Variation
-                float2 heightNoiseInput = (sin(worldPosition.x) + cos(worldPosition.z)) * 0.5 + 0.5;
+                float2 heightNoiseInput = normalize(worldPosition.xz);
                 float heightNoise = tex2Dlod(_BladeHeightNoiseTex, float4(heightNoiseInput, 0.0, 0.0)).r;
-                float heightFactor = lerp(0.5, 1.5, heightNoise) * _BladeHeightVariation;
+                float heightFactor = lerp(1.0, 3.0, heightNoise) * _BladeHeightVariation;
                 worldPosition.y *= heightFactor;
 
                 // basic curve
@@ -122,14 +122,14 @@ Shader "Custom/LitGrassShader"
 
                 // wind effect
                 float u = sin(worldPosition.x * _WindScale + _Time * _WindFrequency) 
-                + cos(worldPosition.z * _WindScale + _Time * _WindFrequency * 0.5);
+                + cos(worldPosition.z * _WindScale + _Time * _WindFrequency);
                 float v = sin(worldPosition.z * _WindScale + _Time * _WindFrequency)
-                + cos(worldPosition.x * _WindScale + _Time * _WindFrequency * 0.5);
+                + cos(worldPosition.x * _WindScale + _Time * _WindFrequency);
                 float2 noiseInput = float2(u, v);
 
                 noiseInput = 0.5 + 0.5 * noiseInput;
                 float windNoise = tex2Dlod(_WindNoiseTex, float4(noiseInput, 0.0, 0.0)).r;
-                float windDisplacement = windNoise * _Time * _WindSpeed; 
+                float windDisplacement = windNoise * _WindSpeed; 
 
                 float springForce = -_Stiffness * windDisplacement;
                 float dampingForce = -_Damping * _WindSpeed;

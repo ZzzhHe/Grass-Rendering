@@ -348,13 +348,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.9961947, z: -0.08715578, w: 0}
-  m_LocalPosition: {x: -8, y: 2, z: 20}
+  m_LocalRotation: {x: 0, y: 0.9848078, z: -0.17364816, w: 0}
+  m_LocalPosition: {x: -8, y: 10.6, z: 20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 10, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 20, y: 180, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -613,8 +613,8 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   computeShader: {fileID: 7200000, guid: 53dc0f246e6ea48e2a1f40690c08bf2d, type: 3}
   grassMaterial: {fileID: 2100000, guid: 6d4f78da271404ca3b6f17c36b932c04, type: 2}
-  gridSize: 300
-  cellSize: 0.08
+  gridSize: 500
+  cellSize: 0.1
   bladeSize: 0.5
 --- !u!4 &1699868639
 Transform:
